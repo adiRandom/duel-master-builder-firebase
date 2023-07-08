@@ -18,7 +18,8 @@ type Card = {
     power: number
     manaNumber: number
     flavorText: string
-    image: string
+    image: string,
+    count: number
 }
 
 type ParsedRow = {
@@ -57,7 +58,8 @@ function parseHtml(html: string, name: string) {
         flavorText: "",
         manaNumber: 0,
         race: "",
-        image: ""
+        image: "",
+        count: 1
     }
     rows?.forEach((row, index) => {
         const parsedRow = parseRow(row as unknown as HTMLTableRowElement, index)
@@ -146,6 +148,14 @@ function addCard(card: Card) {
     return getFirestore().collection("cards").doc(card.name).set(card)
 }
 
+function updateCardNumber(increment: number, card: Card) {
+    return getFirestore().collection("cards").doc(card.name).update({count: card.count + increment})
+}
+
+async function getCardFromFirestore(name: string) {
+    return (await getFirestore().collection("cards").doc(name).get()).data() as Card
+}
+
 function getExpressApp() {
     const app = express();
 
@@ -164,11 +174,21 @@ function getExpressApp() {
         } catch (e) {
             res.status(500).send((e as Error).message)
         }
+    })
 
-
+    app.patch("/card/:name", async (req, res) => {
+        const name = req.params.name;
+        const increment = req.body.increment as number;
+        try {
+            await updateCardNumber(increment, await getCardFromFirestore(name))
+            res.sendStatus(200)
+        } catch (e) {
+            res.status(500).send((e as Error).message)
+        }
     })
 
     return app
+
 }
 
 
