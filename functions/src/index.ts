@@ -1,12 +1,11 @@
 import * as functions from 'firebase-functions'
 import {initializeApp} from 'firebase-admin/app';
 import express from 'express'
-import cors from 'cors'
+// import cors from 'cors'
 import axios from "axios";
 import {parse} from 'node-html-parser';
 import {getFirestore} from 'firebase-admin/firestore';
 import * as cheerio from "cheerio"
-
 
 type Card = {
     name: string
@@ -157,6 +156,7 @@ async function getCardFromFirestore(name: string) {
 }
 
 async function getAllCards() {
+    console.log("HERE")
     return (await getFirestore().collection("cards").get()).docs.map(doc => doc.data() as Card)
 }
 
@@ -164,7 +164,12 @@ function getExpressApp() {
     const app = express();
 
 // Enable CORS
-    app.use(cors({origin: true}));
+    app.use((req, res, next) => {
+        res.set('Access-Control-Allow-Origin', '*');
+        res.set('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
+        res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        next()
+    })
 
 // Parse JSON request bodies
     app.use(express.json());
@@ -193,6 +198,7 @@ function getExpressApp() {
 
     app.get("/card/list", async (req, res) => {
         try {
+            console.log("HERE1")
             res.send(await getAllCards())
         } catch (e) {
             res.status(500).send((e as Error).message)
