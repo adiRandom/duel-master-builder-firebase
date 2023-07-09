@@ -118,7 +118,7 @@ function parseRow(row: HTMLTableRowElement, index: number): ParsedRow | undefine
 }
 
 function sanitize(text: string) {
-    return text.replace("■", "").trim()
+    return text.replace(/■/g, "").trim()
 }
 
 function getFieldNameByHeader(header: string): keyof Card | null {
