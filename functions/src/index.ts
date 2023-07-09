@@ -156,6 +156,10 @@ async function getCardFromFirestore(name: string) {
     return (await getFirestore().collection("cards").doc(name).get()).data() as Card
 }
 
+async function getAllCards() {
+    return (await getFirestore().collection("cards").get()).docs.map(doc => doc.data() as Card)
+}
+
 function getExpressApp() {
     const app = express();
 
@@ -187,8 +191,15 @@ function getExpressApp() {
         }
     })
 
-    return app
+    app.get("/card/list", async (req, res) => {
+        try {
+            res.send(await getAllCards())
+        } catch (e) {
+            res.status(500).send((e as Error).message)
+        }
+    })
 
+    return app
 }
 
 
