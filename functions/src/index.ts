@@ -205,6 +205,24 @@ function getExpressApp() {
         }
     })
 
+    app.get("/card/list/json", async (req, res) => {
+        const cards = await getAllCards()
+        // Send data as downloadable file
+        res.setHeader('Content-disposition', 'attachment; filename=cards.json').setHeader('Content-Type', 'application/json').send(cards)
+    })
+
+    app.put("/card/list/json", async (req, res) => {
+        const cards = req.body as Card[]
+        try {
+            cards.forEach(card =>
+                getFirestore().collection("cards").doc(card.name).set(card)
+            )
+            res.sendStatus(200)
+        } catch (e) {
+            res.status(500).send((e as Error).message)
+        }
+    })
+
     return app
 }
 
