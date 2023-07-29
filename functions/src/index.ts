@@ -24,6 +24,7 @@ type Card = {
 
 export type Deck = {
     name: string
+    id: string
     cards: Card[]
 }
 
@@ -172,7 +173,7 @@ function getExpressApp() {
 // Enable CORS
     app.use((req, res, next) => {
         res.set('Access-Control-Allow-Origin', '*');
-        res.set('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
+        res.set('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS, PUT');
         res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
         next()
     })
@@ -240,11 +241,10 @@ function getExpressApp() {
         }
     })
 
-    app.put("/deck/:name", async (req, res) => {
+    app.put("/deck/:id", async (req, res) => {
         const deck = req.body as Deck
-        const previousName = req.params.name
         try {
-            await getFirestore().collection("decks").doc(previousName).set(deck)
+            await getFirestore().collection("decks").doc(deck.id).set(deck)
             res.sendStatus(200)
         } catch (e) {
             res.status(500).send((e as Error).message)
