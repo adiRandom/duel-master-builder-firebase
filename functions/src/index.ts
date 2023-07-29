@@ -21,6 +21,12 @@ type Card = {
     count: number
 }
 
+
+export type Deck = {
+    name: string
+    cards: Card[]
+}
+
 type ParsedRow = {
     field: keyof Card
     value: string
@@ -218,6 +224,37 @@ function getExpressApp() {
                 getFirestore().collection("cards").doc(card.name).set(card)
             )
             res.sendStatus(200)
+        } catch (e) {
+            res.status(500).send((e as Error).message)
+        }
+    })
+
+
+    app.put("/deck", async (req, res) => {
+        const deck = req.body as Deck
+        try {
+            await getFirestore().collection("decks").doc(deck.name).set(deck)
+            res.sendStatus(200)
+        } catch (e) {
+            res.status(500).send((e as Error).message)
+        }
+    })
+
+    app.put("/deck/:name", async (req, res) => {
+        const deck = req.body as Deck
+        const previousName = req.params.name
+        try {
+            await getFirestore().collection("decks").doc(previousName).set(deck)
+            res.sendStatus(200)
+        } catch (e) {
+            res.status(500).send((e as Error).message)
+        }
+    })
+
+    app.get("/deck/list", async (req, res) => {
+        try {
+            const decks = (await getFirestore().collection("decks").get()).docs.map(doc => doc.data() as Deck)
+            res.send(decks)
         } catch (e) {
             res.status(500).send((e as Error).message)
         }
